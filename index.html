@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<style>
+    label {
+        display: block;
+        margin-bottom: 10px;
+    }
+    hr.sep {
+        max-width: 400px;
+        margin: 20px 0 20px 0;
+    }
+</style>
+</head>
+<body>
+<h1>Google Direction API Demo</h1>
+
+<!-- FORM START -->
+<form id="directions-form" method="GET">
+    <h3>Your Location Information</h3>
+    <label>
+        <span class="label">Location Address</span>
+        <input id="loc_address" name="loc_address" type="text" value="5115 Hampton Boulevard" />
+    </label>
+    <label>
+        <span class="label">Location City</span>
+        <input id="loc_city" name="loc_city" type="text" value="Norfolk" />
+    </label>
+    <label>
+        <span class="label">Location State</span>
+        <input id="loc_state" name="loc_state" type="text" value="VA" />
+    </label>
+    <label>
+        <span class="label">Location Zip Code</span> 
+        <input id="loc_zipcode" name="loc_zipcode" type="text" value="23529" />
+    </label>
+    
+    <br/>
+    
+    <h3>Your Destination Information</h3>
+    <label>
+        <span class="label">Destination Address</span>
+        <input id="dest_address" name="dest_address" type="text" value="701 Lynnhaven Pkwy" />
+    </label>
+    <label>
+        <span class="label">Destination City</span>
+        <input id="dest_city" name="dest_city" type="text" value="Virginia Beach" />
+    </label>
+    <label>
+        <span class="label">Destination State</span>
+        <input id="dest_state" name="dest_state" type="text" value="VA" />
+    </label>
+    <label>
+        <span class="label">Destination Zip Code</span> 
+        <input id="dest_zipcode" name="dest_zipcode" type="text" value="23452" />
+    </label>
+    
+    <hr class="sep">
+    
+    <input type="submit" value="Submit">
+</form>
+<!-- FORM END -->
+
+<br/>
+<br/>
+
+<div id="directions_hud"> </div>
+
+
+<script type="text/javascript">
+
+// Set jQuery in no conflict mode
+jQuery.noConflict();
+
+(function( $ ) {
+    $("#directions-form").submit(function(e) {
+        e.preventDefault();
+                                        
+        // Set variables
+        var loc_address	= $('#loc_address').val().split(' ').join('+');
+        var loc_city 	= $("#loc_city").val().split(' ').join('+');
+        var loc_state 	= $("#loc_state").val().split(' ').join('+');
+        var loc_zipcode	= $('#loc_zipcode').val().split(' ').join('+');
+        
+        var dest_address	= $('#dest_address').val().split(' ').join('+');
+        var dest_city 		= $("#dest_city").val().split(' ').join('+');
+        var dest_state 		= $("#dest_state").val().split(' ').join('+');
+        var dest_zipcode	= $('#dest_zipcode').val().split(' ').join('+');
+        
+        var hud	= $('#directions_hud');
+        
+        var origin_url = loc_address + '+' + loc_city + '+'  + loc_state + '+'  + loc_zipcode;
+        origin_url = origin_url.split(' ').join('+');
+       
+        var destin_url = dest_address + '+'  + dest_city + '+'  + dest_state + '+'  + dest_zipcode;
+        destin_url = destin_url.split(' ').join('+');
+        
+        // If site is https then change this to https
+        var map_url = "http://maps.googleapis.com/maps/api/directions/json?";
+                
+        var parameters = "&origin=" + origin_url + "&destination=" + destin_url + "&sensor=false";
+        
+        // Be sure to change the 'http://localhost/directions/' to the directory the getpage.php is located in
+        var escape_url = encodeURI("http://localhost/directions/getpage.php?url=" + map_url + parameters);
+        
+        //console.log("Origin URL: " + origin_url);
+        //console.log("Destination URL: " + destin_url);
+        //console.log("Output Map URL: " + map_url);
+        console.log("Escape Map URL: " + escape_url);
+        
+        $.getJSON(
+            escape_url, 
+            function(data){
+                var output = "";
+                
+                for (x = 0; x < data.routes[0].legs[0].steps.length; x++) {
+                    output = output + data.routes[0].legs[0].steps[x].html_instructions;
+                    output += " (Distance: " + data.routes[0].legs[0].steps[x].distance.text + ") <br/><br/>";
+                }
+            
+                document.getElementById("directions_hud").innerHTML=output;
+            }
+         )
+         .success(function() { console.log("second success"); })
+         .error(function(jqXHR, textStatus, errorThrown) {
+            console.log("Error: " + textStatus);     
+            console.log("jqXHR Status: " + jqXHR.status);
+            console.log("errorThrown: " + errorThrown);
+            console.log("Incoming Text: " + jqXHR.responseText);
+         })
+         .complete(function() { console.log("Complete"); });
+        
+    }) // end .submit
+})(jQuery);
+</script>
+</body>
+</html>
