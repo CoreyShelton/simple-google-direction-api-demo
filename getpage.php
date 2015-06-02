@@ -13,8 +13,6 @@ if ($_GET['url']):
     $newURL .= 'origin=' . rawurlencode($_GET["origin"]);
     $newURL .= '&destination=' . rawurlencode($_GET["destination"]);
     
-    //echo '<!-- ' . $newURL . ' -->';
-    
     echo file_get_contents($newURL);
 endif;
 ?>
